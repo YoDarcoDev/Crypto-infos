@@ -1,34 +1,20 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cryptomonnaies</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
+<?php require 'elements/header.php'; ?>
 
-<h1 class="text-center p-4 bg-dark text-white">Les différentes cryptomonnaies</h1>
     
 
-<?php
-
-require_once './model/requetes.php';
-
-$cryptos = getCryptosBD();
-
-?>
-
-
-
-
+<!-- DIV API BITCOIN PRICE -->
 <div class="container mt-5">
    <h3 class="text-warning text-center" id="divPrix"></h3>
 </div>
 
+
+
+<!-- DIV INFO CRYPTOS -->
+<?php
+require_once './model/requetes.php';
+$cryptos = getCryptosBD();
+?>
 
 <div class="row mt-5">
 
@@ -64,7 +50,7 @@ $cryptos = getCryptosBD();
                     elseif ($type['libelle'] === "PoW") { ?>
                         <div class="badge bg-danger"><?= $type['libelle'] ?></div>
                     <?php }
-                    
+
                     elseif ($type['libelle'] === "PoS") { ?>
                         <div class="badge bg-success"><?= $type['libelle'] ?></div>
                     <?php } ?>
