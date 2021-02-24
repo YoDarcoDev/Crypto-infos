@@ -39,3 +39,26 @@ function getNomType($idType) {
 }
 
 
+
+function getCryptoNameToDeleteBD($idCrypto) {
+
+    $pdo = MonPDO::getPDO();
+    $req = 'SELECT CONCAT(idProduits, " : ", libelle) as cryptoASupprimer FROM produits WHERE idProduits = :idProduits';
+    $traitement = $pdo->prepare($req);
+    $traitement->bindvalue(":idProduits", $idCrypto, PDO::PARAM_INT);
+    $traitement->execute();
+    $resultat = $traitement->fetch(PDO::FETCH_ASSOC);
+    return $resultat['cryptoASupprimer'];
+}
+
+
+
+
+function deleteCryptoBD($idCrypto) {
+
+    $pdo = MonPDO::getPDO();
+    $req = "DELETE FROM produits WHERE idProduits = :idProduits";
+    $traitement = $pdo->prepare($req);
+    $traitement->bindvalue(":idProduits", $idCrypto, PDO::PARAM_INT);
+    return $traitement->execute();
+}
