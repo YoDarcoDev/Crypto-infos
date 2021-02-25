@@ -13,25 +13,21 @@
 <?php
 require_once './model/requetes.php';
 
-// SUPPRESSION DE LA CRYPTO 
-// POP-UP SUPPRESSION AVEC TRANSMISSION VIA L'URL
-if (isset($_GET['type']) && $_GET['type'] === "suppression") {
 
-    $cryptoNameToDelete = getCryptoNameToDeleteBD($_GET['idCrypto']);
- 
-    ?>
+// VERIFICATION SUPPRESSION AVEC TRANSMISSION VIA L'URL (POPUP)
+if (isset($_GET['type']) && $_GET['type'] === "suppression") {
+    $cryptoNameToDelete = getCryptoNameToDeleteBD($_GET['idCrypto']); ?>
    
     <div class="alert alert-warning" role="alert">
         Voulez-vous vraiment <b class="text-danger">supprimer</b> l'élément : <b><?= $cryptoNameToDelete ?></b>
         <a href="?delete=<?= $_GET['idCrypto']?>" class="btn btn-danger mx-5">Supprimer</a>
         <a href="index.php" class="btn btn-success">Annuler</a>
     </div>
+<?php 
+} 
 
-<?php } 
 
-
-// SUPPRESSION DE LA CRYPTO EN BDD
-
+// SUPPRESSION EN BDD
 if (isset($_GET['delete'])) {
     $success = deleteCryptoBD($_GET['delete']);
 
@@ -42,28 +38,57 @@ if (isset($_GET['delete'])) {
     <?php }
     else { ?>
         <div class="alert alert-danger" role="alert">
-            La suppression n'a pas été éffectuée
+            La suppression n'a pas été effectuée
         </div>
    <?php }
 }
 
 
+// MODIFICATION 
+if (isset($_POST['type']) && $_POST['type'] === "modificationEtape2") {
+    $success = modifierCryptoBD($_POST['idCrypto'], $_POST['nomCrypto'], $_POST['libelleCrypto'], $_POST['descriptionCrypto'], $_POST['idType']);
+
+    if ($success) { ?>
+        <div class="alert alert-success" role="alert">
+            La modification a bien été éffectuée
+        </div>
+    <?php }
+    else { ?>
+        <div class="alert alert-danger" role="alert">
+            La modification n'a pas été effectuée
+        </div>
+   <?php }
+
+
+
+
+}
 
 
 // RECUPERATION DES COURS (A REALISER APRES LA SUPPRESSION EN BDD)
 $cryptos = getCryptosBD();
+$types = getTypesBD();
+
 ?>
 
 
 <a href="ajout.php" class="btn btn-primary">Ajouter</a>
 
-<!-- DIV INFO CRYPTOS -->
+
+<!-- AFFICHER CARD IMG NOM LIBELLE DESC TYPE -->
 <div class="row mt-5">
 
     <?php foreach($cryptos as $crypto) { ?>
         <div class="col-4 d-flex justify-content-around ">
             <div class="card my-5">
 
+
+            <!-- TESTER SI ON A PAS RECU L'INFO DE MODIFICATION DANS L'URL -->
+            <!-- TESTER SI L'ID DE LA CRYPTO COURANTE EST DIFFERENTE DE CELLE DE L'URL -->
+            <?php 
+                if (!isset($_GET['type']) || $_GET['type'] !== "modification" || $_GET['idCrypto'] !== $crypto['idProduits']) { ?>
+
+              
                 <div class="row mt-4">
                     
                     <!-- COLONNE IMAGE -->
@@ -97,6 +122,7 @@ $cryptos = getCryptosBD();
                             <div class="badge bg-success"><?= $type['libelle'] ?></div>
                         <?php } ?>
 
+
                         <a href="https://coinmarketcap.com/currencies/<?= $crypto['nom'] ?>" target="_blank" class="badge bg-primary" id="lien">En savoir plus</a>
 
                     </div>
@@ -123,17 +149,71 @@ $cryptos = getCryptosBD();
                     </div>
 
                 </div>
+                <?php } 
+                
+
+                // MODIFIER CRYPTO AFFICHER FORMULAIRE
+                else { ?>
+                    <form action="" method="POST">
+
+                        <input type="hidden" name="type" value="modificationEtape2">
+                        <input type="hidden" name="idCrypto" value="<?= $crypto['idProduits'] ?>">
+
+                        <div class="mt-3 d-flex justify-content-center align-items-center">
+                            <img src="images/<?= $crypto['image'] ?>" id="img-logo" class="card-img-top" alt="logo crypto">
+                        </div>
+
+                        <!-- MODIFIER INFOS NOM LIBELLE DESC TYPE -->
+                        <div class="card-body">
+                            
+                            <div class="form-group">
+                                <label for="nomCrypto">Nom de la crypto :</label>
+                                <input type="text" class="form-control mb-2" name="nomCrypto" id="nomCrypto" value="<?= $crypto['nom'] ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="libelleCrypto">Libelle :</label>
+                                <input type="text" class="form-control mb-2" name="libelleCrypto" id="libelleCrypto" value="<?= $crypto['libelle'] ?>">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="descriptionCrypto">Description :</label>
+                                <textarea class="form-control mb-2" name="descriptionCrypto" rows="3" id="descriptionCrypto"><?= $crypto['description'] ?></textarea>
+                            </div>
+
+                            <select name="idType" class="form-control">
+                                <?php foreach ($types as $type) {  ?>
+                                    <option value="<?= $type['idType'] ?>"
+                                        <?php ($type['idType'] === $crypto['idType']) ? "selected" : "" ?>
+                                    ><?= $type['libelle'] ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                       
+                            <!-- BOUTON MODIFIER - ANNULER FORM -->
+                            <div class="row">
+                                <div class="col-6 text-center">
+                                    <input type="submit" value="Valider" class="btn btn-success">
+                                </div>
+                                <div class="col-6 text-center">
+                                    <input type="submit" value="Annuler" onclick="annulerModification(event)" class="btn btn-danger">
+                                </div>
+                            </div>
+            
+                        </div>
+                    </form>
+                <?php } ?>
+
 
             </div>
         </div>
     <?php } ?> 
-
 </div>
 
 
 
 <script src="Api/api.js"></script>
-
+<script src="form-btn-annuler.js"></script>
 
 <scrip src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></scrip>
 </body>
