@@ -104,16 +104,28 @@ function deleteCryptoBD($idCrypto) {
  * @param  int $idType
  * @return bool
  */
-function modifierCryptoBD($idCrypto, $nom, $libelle, $description, $idType) {
+function modifierCryptoBD($idCrypto, $nom, $libelle, $description, $idType, $nomImage) {
     
     $pdo = MonPDO::getPDO();
-    $req = "UPDATE produits set nom = :nomCrypto, libelle = :libelleCrypto, description = :descriptionCrypto, idType = :idType WHERE idProduits = :idProduits";
+    $req = "UPDATE produits 
+            set nom = :nomCrypto, libelle = :libelleCrypto, description = :descriptionCrypto, idType = :idType";
+    
+    // SI NOUVELLE IMAGE
+    if ($nomImage !== "") {
+        $req .= ", image = :image";
+    }
+
+    $req .= " WHERE idProduits = :idProduits";
+
     $traitement = $pdo->prepare($req);
     $traitement->bindvalue(":idProduits", $idCrypto, PDO::PARAM_INT);
     $traitement->bindvalue(":nomCrypto", $nom, PDO::PARAM_STR);
     $traitement->bindvalue(":libelleCrypto", $libelle, PDO::PARAM_STR);
     $traitement->bindvalue(":descriptionCrypto", $description, PDO::PARAM_STR);
     $traitement->bindvalue(":idType", $idType, PDO::PARAM_INT);
+    if ($nomImage !== "") {
+        $traitement->bindvalue(":image", $nomImage, PDO::PARAM_STR);
+    }
     return $traitement->execute();
 }
 
@@ -140,4 +152,24 @@ function ajoutCryptoBD($nom, $libelle, $description, $idType, $image) {
     $traitement->bindvalue(":image", $image, PDO::PARAM_STR);
     $traitement->bindvalue(":type", $idType, PDO::PARAM_INT);
     return $traitement->execute();
+}
+
+
+
+
+/**
+ * Permet de récupérer le nom de l'image
+ *
+ * @param  int $idCrypto
+ * @return mixed image
+ */
+function getImageToDelete($idCrypto) {
+
+    $pdo = MonPDO::getPDO();
+    $req = 'SELECT image FROM produits WHERE idProduits = :idProduits';
+    $traitement = $pdo->prepare($req);
+    $traitement->bindvalue(":idProduits", $idCrypto, PDO::PARAM_INT);
+    $traitement->execute();
+    $resultat = $traitement->fetch(PDO::FETCH_ASSOC);
+    return $resultat['image'];
 }

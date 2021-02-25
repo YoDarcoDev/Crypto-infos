@@ -1,37 +1,48 @@
 <?php 
 require 'elements/header.php';
 require_once 'model/requetes.php';
+require_once 'gestionImage.php';
 
 
 // AJOUTER 
 if (isset($_POST['nom'])) {
-    $success = ajoutCryptoBD($_POST['nom'], $_POST['libelle'], $_POST['description'], (int)$_POST['idType'], "photo.png");
 
-    if ($success) { ?>
-        <div class="alert alert-success" role="alert">
-            L'ajout a bien été éffectué
-        </div>
-    <?php }
-    else { ?>
-        <div class="alert alert-danger" role="alert">
-            L'ajout n'a pas été effectué
-        </div>
-   <?php }
+    $fileImage = $_FILES['logoCrypto'];
+    $repertoire = "images/";
+    
+    try {
+
+        $nomImage = ajoutImage($fileImage, $repertoire, $_POST['nom']);
+
+        $success = ajoutCryptoBD($_POST['nom'], $_POST['libelle'], $_POST['description'], (int)$_POST['idType'], $nomImage );
+
+        if ($success) { ?>
+            <div class="alert alert-success" role="alert">
+                L'ajout a bien été éffectué
+            </div>
+        <?php }
+        else { ?>
+            <div class="alert alert-danger" role="alert">
+                L'ajout n'a pas été effectué
+            </div>
+        <?php }
+    }
+    catch(Exception $e) {
+        echo $e->getMessage();
+    }
 }
-
-
 
 
 
 $types = getTypesBD();
 ?>
 
-<h2 class="text-center mt-5">Ajouter une nouvelle Crypto Monnaie</h2>
+<h2 class="text-center mt-5 text-white">Ajouter une nouvelle Crypto Monnaie</h2>
 
 <div class="container">
 
 
-    <form action="" method="POST">
+    <form action="" method="POST" enctype="multipart/form-data">
 
         <div class="form-group mt-5">
             <label for="nom">Nom : </label>
@@ -58,8 +69,8 @@ $types = getTypesBD();
         </div>
 
         <div class="form-group mt-4">
-            <label>Ajouter un Logo :</label>
-            <input type="file" class="form-control-file" name="logoCrypto">
+            <label class="text-white">Ajouter un Logo :</label>
+            <input type="file" class="form-control-file text-white" name="logoCrypto">
         </div>
 
         <div>

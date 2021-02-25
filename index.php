@@ -12,6 +12,7 @@
 
 <?php
 require_once './model/requetes.php';
+require_once 'gestionImage.php';
 
 
 // VERIFICATION SUPPRESSION AVEC TRANSMISSION VIA L'URL (POPUP)
@@ -29,6 +30,11 @@ if (isset($_GET['type']) && $_GET['type'] === "suppression") {
 
 // SUPPRESSION EN BDD
 if (isset($_GET['delete'])) {
+
+    // SUPPRIME L'IMAGE DU DOSSIER IMAGES
+    $imageToDelete = getImageToDelete($_GET['delete']);
+    deleteImage("images/", $imageToDelete);
+    // SUPPRIME LES INFOS 
     $success = deleteCryptoBD($_GET['delete']);
 
     if ($success) { ?>
@@ -46,7 +52,29 @@ if (isset($_GET['delete'])) {
 
 // MODIFICATION 
 if (isset($_POST['type']) && $_POST['type'] === "modificationEtape2") {
-    $success = modifierCryptoBD($_POST['idCrypto'], $_POST['nomCrypto'], $_POST['libelleCrypto'], $_POST['descriptionCrypto'], $_POST['idType']);
+
+    // MODIFIER IMAGE SUPPRESSION
+    $nomNouvelleImage = "";
+    if ($_FILES['logoCrypto']['name'] !== "") {
+
+        $imageToDelete = getImageToDelete($_POST['idCrypto']);
+        deleteImage("images/", $imageToDelete);
+
+        // MODIFIER IMAGE AJOUT
+        $fileImage = $_FILES['logoCrypto'];
+        $repertoire = "images/";
+        
+        try {
+            // NOUVEAU NOM DE L'IMAGE
+            $nomNouvelleImage = ajoutImage($fileImage, $repertoire, $_POST['nomCrypto']);
+        }
+        catch(Exception $e) {
+            echo $e->getMessage();
+        }
+    }
+
+    $success = modifierCryptoBD($_POST['idCrypto'], $_POST['nomCrypto'], $_POST['libelleCrypto'], $_POST['descriptionCrypto'], $_POST['idType'], $nomNouvelleImage);
+
 
     if ($success) { ?>
         <div class="alert alert-success" role="alert">
@@ -103,6 +131,7 @@ $types = getTypesBD();
                         <!-- BADGE TYPE -->
                         <?php 
                             $type = getNomType($crypto['idType']);
+                            // print_r($type);
                         
                         if ($type['libelle'] === "Smart Contracts") { ?>
                             <div class="badge bg-warning"><?= $type['libelle'] ?></div>
@@ -148,13 +177,20 @@ $types = getTypesBD();
 
                 // MODIFIER CRYPTO AFFICHER FORMULAIRE
                 else { ?>
-                    <form action="" method="POST">
+                    <form action="" method="POST" enctype="multipart/form-data">
 
                         <input type="hidden" name="type" value="modificationEtape2">
                         <input type="hidden" name="idCrypto" value="<?= $crypto['idProduits'] ?>">
 
-                        <div class="mt-3 d-flex justify-content-center align-items-center">
-                            <img src="images/<?= $crypto['image'] ?>" id="img-logo" class="card-img-top" alt="logo crypto">
+                        <div class="row mt-3">
+
+                            <div class="col-6 d-flex justify-content-around align-items-center">
+                                <img src="images/<?= $crypto['image'] ?>" id="img-logo" class="card-img-top" alt="logo crypto">
+                            </div>
+                            <div class="col-6 d-flex justify-content-around align-items-center">
+                                <input type="file" class="form-control-file" name="logoCrypto">
+                            </div>
+                            
                         </div>
 
                         <!-- MODIFIER INFOS NOM LIBELLE DESC TYPE -->
@@ -175,7 +211,7 @@ $types = getTypesBD();
                                 <textarea class="form-control mb-2" name="descriptionCrypto" rows="3" id="descriptionCrypto"><?= $crypto['description'] ?></textarea>
                             </div>
 
-                            <select name="idType" class="form-control">
+                            <select name="idType" class="form-control mb-3">
                                 <?php foreach ($types as $type) {  ?>
                                     <option value="<?= $type['idType'] ?>"
                                         <?php ($type['idType'] === $crypto['idType']) ? "selected" : "" ?>
@@ -193,7 +229,7 @@ $types = getTypesBD();
                                     <input type="submit" value="Annuler" onclick="annulerModification(event)" class="btn btn-danger">
                                 </div>
                             </div>
-            
+                                    
                         </div>
                     </form>
                 <?php } ?>
@@ -212,3 +248,6 @@ $types = getTypesBD();
 <scrip src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js" integrity="sha384-b5kHyXgcpbZJO/tY9Ul7kGkf1S0CWuKcCD38l8YkeH8z8QjE0GmW1gYU5S9FOnJ0" crossorigin="anonymous"></scrip>
 </body>
 </html>
+
+
+
