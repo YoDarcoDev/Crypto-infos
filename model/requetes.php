@@ -93,6 +93,17 @@ function deleteCryptoBD($idCrypto) {
 
 
 
+
+/**
+ * Modifie Crypto en BDD
+ *
+ * @param  int $idCrypto
+ * @param  string $nom
+ * @param  string $libelle
+ * @param  string $description
+ * @param  int $idType
+ * @return bool
+ */
 function modifierCryptoBD($idCrypto, $nom, $libelle, $description, $idType) {
     
     $pdo = MonPDO::getPDO();
@@ -108,3 +119,25 @@ function modifierCryptoBD($idCrypto, $nom, $libelle, $description, $idType) {
 
 
 
+
+/**
+ * Ajouter Crypto en BDD
+ *
+ * @param  string $nom
+ * @param  string $libelle
+ * @param  string $description
+ * @param  int $idType
+ * @param  mixed $image
+ * @return bool
+ */
+function ajoutCryptoBD($nom, $libelle, $description, $idType, $image) {
+    $pdo = MonPDO::getPDO();
+    $req = "INSERT INTO produits (nom, libelle, description, image, idType) VALUES (:nom , :libelle, :description, :image, :type)";
+    $traitement = $pdo->prepare($req);
+    $traitement->bindvalue(":nom", $nom, PDO::PARAM_STR);
+    $traitement->bindvalue(":libelle", $libelle, PDO::PARAM_STR);
+    $traitement->bindvalue(":description", $description, PDO::PARAM_STR);
+    $traitement->bindvalue(":image", $image, PDO::PARAM_STR);
+    $traitement->bindvalue(":type", $idType, PDO::PARAM_INT);
+    return $traitement->execute();
+}

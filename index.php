@@ -58,21 +58,15 @@ if (isset($_POST['type']) && $_POST['type'] === "modificationEtape2") {
             La modification n'a pas été effectuée
         </div>
    <?php }
-
-
-
-
 }
+
 
 
 // RECUPERATION DES COURS (A REALISER APRES LA SUPPRESSION EN BDD)
 $cryptos = getCryptosBD();
 $types = getTypesBD();
-
 ?>
 
-
-<a href="ajout.php" class="btn btn-primary">Ajouter</a>
 
 
 <!-- AFFICHER CARD IMG NOM LIBELLE DESC TYPE -->
