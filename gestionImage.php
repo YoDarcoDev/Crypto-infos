@@ -2,7 +2,7 @@
 
 function ajoutImage($file, $dir, $nom){
     if(!isset($file['name']) || empty($file['name']))
-        throw new Exception("Vous devez indiquer une image");
+        throw new Exception('<div class="alert alert-danger">Vous devez ajouter une image </div>');
 
     if(!file_exists($dir)) mkdir($dir,0777);
 
@@ -10,19 +10,19 @@ function ajoutImage($file, $dir, $nom){
     $target_file = $dir. $nom . "_". $file['name'];
     
     if(!getimagesize($file["tmp_name"]))
-        throw new Exception("Le fichier n'est pas une image");
+        throw new Exception('<div class="alert alert-danger">Le fichier n\'est pas une image</div>');
 
     if($extension !== "jpg" && $extension !== "jpeg" && $extension !== "png" && $extension !== "gif" && $extension !== "svg")
-        throw new Exception("L'extension du fichier n'est pas reconnu");
+        throw new Exception('<div class="alert alert-danger">"L\'extension du fichier n\'est pas reconnu"</div>');
 
     if(file_exists($target_file))
-        throw new Exception("Le fichier existe déjà");
+        throw new Exception('<div class="alert alert-danger">Le fichier existe déjà</div>');
 
     if($file['size'] > 500000)
-        throw new Exception("Le fichier est trop volumineux");
+        throw new Exception('<div class="alert alert-danger">Le fichier est trop volumineux</div>');
 
     if(!move_uploaded_file($file['tmp_name'], $target_file))
-        throw new Exception("l'ajout de l'image n'a pas fonctionné");
+        throw new Exception('<div class="alert alert-danger">L\'ajout de l\'image n\'a pas fonctionné</div>');
     else return ($nom . "_". $file['name']);
 }
 
